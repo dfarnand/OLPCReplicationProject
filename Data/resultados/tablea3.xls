@@ -1,0 +1,73 @@
+variable	grupo	obsg1	mean_g1	star	obsg0	mean_g0
+"ceroses"	"segundo"	630	0.238	"**"	645	0.127
+"ceroses"	"sexto"	687	0.115	""	645	0.127
+"ceroses"	"mujer2"	967	0.149	""	995	0.168
+"ceroses"	"high"	1017	0.162	""	945	0.154
+"unases"	"segundo"	630	0.192	"**"	645	0.149
+"unases"	"sexto"	687	0.124	""	645	0.149
+"unases"	"mujer2"	967	0.161	""	995	0.147
+"unases"	"high"	1017	0.140	"*"	945	0.169
+"dosses"	"segundo"	630	0.116	""	645	0.095
+"dosses"	"sexto"	687	0.124	"*"	645	0.095
+"dosses"	"mujer2"	967	0.111	""	995	0.113
+"dosses"	"high"	1017	0.115	""	945	0.108
+"tresses"	"segundo"	630	0.111	""	645	0.119
+"tresses"	"sexto"	687	0.089	"*"	645	0.119
+"tresses"	"mujer2"	967	0.101	""	995	0.111
+"tresses"	"high"	1017	0.119	"*"	945	0.092
+"cuatses"	"segundo"	630	0.343	"**"	645	0.510
+"cuatses"	"sexto"	687	0.549	""	645	0.510
+"cuatses"	"mujer2"	967	0.478	""	995	0.462
+"cuatses"	"high"	1017	0.464	""	945	0.476
+"standard"	"segundo"	622	0.435	"**"	635	0.478
+"standard"	"sexto"	682	0.499	""	635	0.478
+"standard"	"mujer2"	960	0.502	"**"	979	0.441
+"standard"	"high"	1004	0.460	"*"	935	0.484
+"games"	"segundo"	622	0.215	"**"	635	0.174
+"games"	"sexto"	682	0.126	"**"	635	0.174
+"games"	"mujer2"	960	0.170	""	979	0.170
+"games"	"high"	1004	0.169	""	935	0.172
+"music"	"segundo"	622	0.101	""	635	0.108
+"music"	"sexto"	682	0.133	"**"	635	0.108
+"music"	"mujer2"	960	0.093	"**"	979	0.136
+"music"	"high"	1004	0.118	""	935	0.111
+"program"	"segundo"	622	0.054	""	635	0.063
+"program"	"sexto"	682	0.053	""	635	0.063
+"program"	"mujer2"	960	0.052	"*"	979	0.062
+"program"	"high"	1004	0.058	""	935	0.055
+"other"	"segundo"	622	0.196	"*"	635	0.177
+"other"	"sexto"	682	0.189	""	635	0.177
+"other"	"mujer2"	960	0.184	""	979	0.191
+"other"	"high"	1004	0.195	"*"	935	0.178
+"jorescol"	"segundo"	622	0.642	""	635	0.608
+"jorescol"	"sexto"	682	0.630	""	635	0.608
+"jorescol"	"mujer2"	960	0.609	"*"	979	0.644
+"jorescol"	"high"	1004	0.612	"*"	935	0.642
+"basic"	"segundo"			""		
+"basic"	"sexto"	866	0.838	"**"	846	0.781
+"basic"	"mujer2"	845	0.795	"**"	867	0.825
+"basic"	"high"	891	0.809	""	821	0.812
+"escribir"	"segundo"			""		
+"escribir"	"sexto"	866	0.647	"**"	846	0.495
+"escribir"	"mujer2"	845	0.555	"**"	867	0.588
+"escribir"	"high"	891	0.578	""	821	0.565
+"invest"	"segundo"			""		
+"invest"	"sexto"	866	0.745	"**"	843	0.592
+"invest"	"mujer2"	843	0.657	""	866	0.681
+"invest"	"high"	888	0.690	"**"	821	0.648
+"libdib"	"segundo"			""		
+"libdib"	"sexto"	864	0.663	"**"	842	0.542
+"libdib"	"mujer2"	841	0.587	"**"	865	0.620
+"libdib"	"high"	888	0.602	""	818	0.605
+"cuentos"	"segundo"			""		
+"cuentos"	"sexto"	864	0.705	"**"	842	0.559
+"cuentos"	"mujer2"	842	0.622	""	864	0.644
+"cuentos"	"high"	886	0.637	""	820	0.628
+"ubicar"	"segundo"			""		
+"ubicar"	"sexto"	866	0.846	"**"	846	0.727
+"ubicar"	"mujer2"	845	0.768	"**"	867	0.806
+"ubicar"	"high"	891	0.788	""	821	0.786
+"habilap"	"segundo"			""		
+"habilap"	"sexto"	862	0.721	"**"	839	0.593
+"habilap"	"mujer2"	838	0.643	"**"	863	0.672
+"habilap"	"high"	884	0.662	""	817	0.653

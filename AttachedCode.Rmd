@@ -1,0 +1,653 @@
+---
+title: "Data Science for Social Impact Final: Appendix A"
+author: Daniel Farnand, Armanda Lewis, Jonathan Mejia
+output: 
+  pdf_document:
+    number_sections: yes
+---
+
+```{r, include=F}
+require(dplyr)
+require(pander)
+
+knitr::opts_chunk$set(echo=F)
+
+## Necessary to left align the rownames
+panderOptions('table.alignment.rownames', 'left')
+panderOptions('table.split.cells', 80)
+panderOptions('table.split.table', Inf)
+##panderOptions('table.style', 'grid')
+```
+
+This document was prepared in R markdown. To look at the code that generates it, either look at the Rmd file (also attached) or find it along with all the other relevant code and data at (github.com/dfarnand/OLPCReplicationProject)[https://github.com/dfarnand/OLPCReplicationProject].
+
+# Replicate Original Results
+
+This section will replicate the original results published in the paper. Unfortunately, one of the tables can not be replicated here, as it was generated with individual educational data from the Peruvian government, from which students or teachers may have been identifiable if released. This table contained descriptive characteristics of the schools, however, and does not contain results or effects.
+
+In order to generate the remaining results, the Stata do file `resultados.do` was run. This file loads the raw data in `docente.dta` and `estudiante.dta`, runs all statistic functions and models, and saves the appropriate results tab-separated format (although they are confusingly given the extension of `xls`).
+
+```{r}
+## Preparation of the tables (Have to do this first, because we need to get the 
+## p-values to adjust)
+
+#############
+## Table 2 ##
+#############
+
+## Loading and Preparing Table
+tbl2 <- read.csv("Data/resultados/table2.xls", sep='\t') # Uses a tab separator
+tbl2[tbl2 == 0] <- NA # Refers to unavailable data, not sample size 0.
+tbl2 <- mutate(tbl2, All = rowSums(tbl2),
+       interviewed = followed + sixth)
+
+## Proper Labels
+rownames(tbl2) <- c("Baseline (Nov 2008)", "Follow Interview (Nov 2010)", "Followup Tests (Nov 2010)")
+
+#############
+## Table 3 ##
+#############
+
+tbl3 <- read.csv("Data/resultados/table3.xls", sep='\t') %>%
+  mutate(adj_dif = paste0(d_m2,' (',d_s2,')')) %>%
+  select(t_m, c_m, adj_dif, n) ## Removing extra columns (unadjusted SE)
+
+rownames(tbl3) <- c("Math", "Language", "Average Academic Achivement", "Overage",
+                    "Female", "Native Lang Spanish", "Attended Preschool")
+
+
+#############
+## Table 4 ##
+#############
+
+tbl4 <- read.csv("Data/resultados/table4.xls", sep='\t') %>%
+  mutate(adj_dif = paste0(d_m2,' (',d_s2,')')) %>%
+  select(t_m, c_m, adj_dif, n) ## Removing extra columns (unadjusted SE)
+
+rownames(tbl4) <- c("Age", "Female", "Native Lang Spanish",
+                    "Number of Individuals in Household",
+                    "Number of Siblings in Household",
+                    "Father Attained More than Primary Education",
+                    "Mother Attained More than Primary Education",
+                    "Mother's Native Lang Spanish"," TV", "Radio", "Cell Phone" ,
+                    "Electricity", "Running Water", "Sewage", "Cement Floor",
+                    "Recieves Conditional Cash Transfer", "More than 5 Books",
+                    "Less than 15 Minutes from School")
+
+
+#############
+## Table 5 ##
+#############
+
+tbl5 <- read.csv("Data/resultados/table5.xls", sep='\t') %>%
+  mutate(adj_dif = paste0(d_m2,' (',d_s2,')')) %>%
+  select(t_m, c_m, adj_dif, n) ## Removing extra columns (unadjusted SE)
+
+rownames(tbl5) <- c("School Received Laptops",
+                    "School has Electricity",
+                    "School has Internet Access",
+                    "Teacher Received Training")
+
+
+#############
+## Table 6 ##
+#############
+
+tbl6 <- read.csv("Data/resultados/table6.xls", sep='\t') %>%
+  mutate(adj_dif = paste0(d_m2,' (',d_s2,')'))
+
+rownames(tbl6) <- c("School has computers (School Level)",
+                    "Number of computers per student at the school (School Level)",
+                    "Student has a computer",
+                    "Computer access summary measure",
+                    "Used a computer last week",
+                    "Used a computer at school last week",
+                    "Used a computer at home last week",
+                    "Used a computer in a private center last week",
+                    "Ever used internet",
+                    "Computer use summary measure")
+
+## print(tbl6$p) # Values to paste into `fdr.do`
+
+
+#############
+## Table 7 ##
+#############
+
+tbl7 <- read.csv("Data/resultados/table7.xls", sep='\t')
+
+rownames(tbl7) <- c("No Sessions in Last Week",
+                    "One Session in Last Week",
+                    "Two Sessions in Last Week",
+                    "Three Sessions in Last Week",
+                    "Four or more Sessions in Last Week",
+                    "Laptop Use at School",
+                    "Laptop Use at Home",
+                    "Proportion Standard Applications",
+                    "Proportion Games",
+                    "Proportion Music",
+                    "Proportion Programming",
+                    "Propotion Other",
+                    "Number of Students with Laptop Logs Extracted",
+                    "Competancy: Basic operation",
+                    "Competancy: Journal application",
+                    "Competancy: Write application",
+                    "Competancy: Wikipedia application",
+                    "Competancy: Picture books",
+                    "Competancy: Stories",
+                    "Average competence",
+                    "Number of students Interviewed")
+
+#############
+## Table 8 ##
+#############
+
+tbl8 <- read.csv("Data/resultados/table8.xls", sep='\t') %>%
+  mutate(adj_dif = paste0(d_m2,' (',d_s2,')'))
+
+rownames(tbl8) <- c("Enrollment (School Level)",
+                    "Attendance",
+                    "Studied at home yesterday",
+                    "Studied at home one or more hours daily last week",
+                    "Read a book yesterday",
+                    "Read a book last week",
+                    "Learning behaviors summary measure",
+                    "Intrinsic Motivation Index",
+                    "Self-perceived school competence index",
+                    "Noncognitive outcomes summary measure")
+
+
+#############
+## Table 9 ##
+#############
+
+
+
+tbl9 <- read.csv("Data/resultados/table9.xls", sep='\t') %>%
+  mutate(adj_dif_all = paste0(d1_m,' (',d1_s,')'),
+         adj_dif_int = paste0(d2_m,' (',d2_s,')'))
+
+ 
+rownames(tbl9) <- c("Math",
+                    "Language",
+                    "Academic Achievement Summary",
+                    "Raven's Progressive Matrices",
+                    "Verbal Fluency Test",
+                    "Coding Test",
+                    "Cognitive Skills Summary",
+                    "Academic Achievement/Cognitive Skill Summary")                    
+
+
+
+##############
+## Table 10 ##
+##############
+
+tbl10_raw <- read.csv("Data/resultados/table10.xls", sep='\t')
+
+## Table 10 needs to be completely reshaped - this is done below, since we only
+## need to load the file to get the original p values
+
+#######################
+## Adjusted P Values ##
+#######################
+
+all_p <- c(tbl6$p, tbl8$p, tbl9$d1_p, tbl9$d2_p, tbl10_raw$d_p)
+adjusted_p <- p.adjust(all_p, method='fdr')
+
+```
+
+
+## School Characteristics
+
+```{r, echo=F}
+pander(matrix(), caption = "Unavailable due to confidentiality risk")
+```
+
+## Sample Size
+
+```{r}
+## Displaying Data
+pander(tbl2, col.names = c("2nd Grade","Followed Cohort","6th Grade",
+                           "All","Interviewed Sample"),
+             caption="Student Sample Sizes")
+```
+
+## Pretreatment Balance
+
+
+```{r}
+
+pander(tbl3, col.names = c("Treatment", "Control", "Adj. Difference (SE)", "Obs"),
+             caption="Pretreatment Balance (Followed Cohort)")
+```
+
+## Followup Balance
+
+```{r}
+
+pander(tbl4, col.names = c("Treatment", "Control", "Adj. Difference (SE)", "Obs"),
+             caption="Balance at Followup (Interviewed Sample)")
+
+```
+
+## Compliance to Treatment
+
+```{r}
+
+pander(tbl5, col.names = c("Treatment", "Control", "Adj. Difference (SE)", "Obs"),
+             caption="Treatment Compliance")
+
+```
+
+## Effects on Computer Use
+
+```{r, eval=F, echo=F}
+## This was our attempt at a direct port of the Stata code that calculated the 
+## FDR Q values. Unfortunately it isn't working, and wasn't deemed worth the 
+## time that it would require.
+
+sharpQ <- function(pvals) {
+  ## Collect the total number of p-values tested
+  totalpvals <- length(pvals)
+
+  ## Sort the p-values in ascending order and generate a variable that codes 
+  ## each p-value's rank
+  
+  original_sorting_order = order(pvals)
+  rank <- 1:totalpvals
+
+  ##  Set the initial counter to 1 
+  qval <- 1
+
+  ## Generate the variable that will contain the BKY (2006) sharpened q-values
+  bky06_qval <- rep(1, totalpvals)
+
+  ## Set up a loop that begins by checking which hypotheses are rejected at q =
+  ## 1.000, then checks which hypotheses are rejected at q = 0.999, then checks
+  ## which hypotheses are rejected at q = 0.998, etc. The loop ends by checking
+  ## which hypotheses are rejected at q = 0.001.
+
+  while (qval > 0) {
+    ## First stage
+    ## 1. Generate the adjusted first stage q level we are testing: q' = q/1+q
+    qval_adj = qval/(1+qval)
+
+    fdr_temp1 <- qval_adj*rank/totalpvals
+    reject_temp1 <- (fdr_temp1 >= pvals)
+    reject_rank1 <- reject_temp1*rank
+    total_rejected1 <- max(reject_rank1)
+
+    ## Second Stage
+    qval_2st <- qval_adj*(totalpvals/(totalpvals-total_rejected1))
+    fdr_temp2 <- qval_2st*rank/totalpvals
+    reject_temp2 <- (fdr_temp2 >= pvals)
+    reject_rank2 <- reject_temp2*rank
+    total_rejected2 <- max(reject_rank2)
+
+    bky06_qval[rank <= total_rejected2]  <- qval
+    qval <- qval - 0.01
+  }
+
+}
+```
+
+To evaluate the treatment effects, the authors of the paper use the multiple hypothesis testing adjustment detailed by Benjamini, Krieger, and Yekutieli (Benjamini et al 2006), specifically **Sharpened Two-Stage q-values**. Code was provided to calculate these values, however it unfortunately relies on a manual process, pasting in a vector of p-values with which it will calculate the resulting q vector. Attempts were made to replicate this with R, but it appears an implementation of this particular method has not yet been developed. Even when using the Stata code, however, the exact values published in the paper were not obtained (though never so drastically as to change an interpretation of significant). For this reason, we opted to calculate the p value adjustment for this replication using the similar Benjamini & Hochberg (1995) method.
+
+```{r}
+## ## Q values calculated manually with `fdr.do`
+## tbl6$q <- c(.001, .001, .001, .001, .001, .001, .001, .07, .005, .001)
+
+## Adding the adjusted p values
+tbl6$q <- adjusted_p[1:10]
+
+select(tbl6, t_m, c_m, adj_dif, q, n) %>% ## Removing extra columns (unadjusted SE)
+  pander(col.names = c("Treatment", "Control", "Adj. Difference (SE)",
+                             "q-value", "Obs"),
+               caption="Effects on Computer Access and Use (Interviewed Sample)")
+```
+
+The p adjustment used here was slightly more conservative than that used in the original paper, leading the "ever used internet" variable to no longer be considered significant within an alpha of 0.05.
+
+
+## Laptop Use and Competence
+
+```{r}
+select(tbl7, mean) %>%
+  pander(caption="Laptop Use (from Logs), and Competancy (Percent correct responses in Interview)")
+```
+
+## Effects on Learning Behavior and Non-cognitive Outcomes
+
+```{r}
+## Adding adjusted P values
+tbl8$q <- adjusted_p[11:20]
+
+select(tbl8, t_m, c_m, adj_dif, q, n) %>% 
+  pander(col.names =  c("Treatment", "Control", "Adj. Difference (SE)",
+                             "q-value", "Obs"),
+         caption="Effects on Learning Behaviors and Noncognitive Outcomes",
+         split.cell = 80, split.table = Inf)
+```
+
+## Effects on Academic Achievement and Cognitive Outcomes
+
+```{r}
+tbl9$q_all = adjusted_p[21:28]
+tbl9$q_int = adjusted_p[29:36]
+
+select(tbl9, adj_dif_all, q_all, adj_dif_int, q_int) %>%
+  pander(col.names = c("Overall Adj. Difference (SE)", "Overall q-value",
+                             "Interviewed Adj. Difference (SE)", "Interviewed q-value"),
+         caption="Effects on Academic and Cognitive Outcomes")
+
+         
+```
+
+## Heterogeneous Effects on Academic Achievement and Cognitive Outcomes
+
+```{r}
+## Adding Q scores (for everything?)
+tbl10_raw$q <- adjusted_p[37:92]
+
+## Quick function to do the pasting here (uses names of columns)
+pasteThree <- function(mini_df, mn, ster, qval){
+  paste0(round(mini_df[,mn],3),
+         '\n(',round(mini_df[,ster],3),')',
+         '\n[',round(mini_df[,qval],3),']')
+}
+
+tbl10 <- data.frame(second = pasteThree(tbl10_raw[1:8,],"d_m", "d_s", "q"),
+                    followed = pasteThree(tbl10_raw[9:16,],"d_m", "d_s", "q"),
+                    sixth = pasteThree(tbl10_raw[17:24,],"d_m", "d_s", "q"),
+                    female = pasteThree(tbl10_raw[25:32,],"d_m", "d_s", "q"),
+                    male = pasteThree(tbl10_raw[33:40,],"d_m", "d_s", "q"),
+                    low = pasteThree(tbl10_raw[41:48,],"d_m", "d_s", "q"),
+                    high = pasteThree(tbl10_raw[49:56,],"d_m", "d_s", "q"))
+ 
+rownames(tbl10) <- c("Math",
+                    "Language",
+                    "Math/Language Summary measure",
+                    "Raven’s Progressive Matrices",
+                    "Verbal fluency test",
+                    "Coding test",
+                    "Cognitive Summary measure",
+                    "Overall Summary Measure")
+
+
+pander(tbl10, caption = "Heterogeneous Effect on Academic Achievement (Note that Standard Error is given in parenthesis, and q value is given is square brackets",
+       col.names = c("Second Grade","Followed Cohort","Sixth Grade","Female",
+                     "Male","Low Baseline Score","High Baseline Score"))
+```
+
+In general the results replicated well, with a minor exception and the required change in p value adjustment. If recommendations could be made to the researchers, it would be that they functionalize their code better to not require copying and pasting of values. Furthermore, as even following their procedure the exact q values were not duplicated, it would help if they could explain if extra steps are needed.
+
+# New Analyses
+
+```{r, include=F}
+require(lme4)
+require(lmerTest) # To get p-vals
+require(foreign) # For loading stata files
+
+## Loading raw data
+estud <- read.dta("Data/bd_finales/estudiante_oldver.dta")
+docen <- read.dta("Data/bd_finales/docente_oldver.dta")
+```
+
+## Redoing Analyses with Stratum and School-Level random Intercepts
+
+The text mentions looking at the data as a multilevel model by Strata and "Randomization Group" (i.e. school), however the Stata code shows a slightly different model, a normal regression using clustered standard error. Though this is likely to yield similar results, redoing the analysis while allowing for random intercepts is relevant to confirming the authors findings. 
+
+The following tables are based on tables 6, 8, and 9 (both above and in the original paper). In general the model used was the following:
+$$\text{Outcome}_{ijk} = b_0 + b_1 \text{Treatment}_{ijk} + \zeta_{jk} + \eta_{k} + \epsilon_{ijk}$$
+Where $\zeta_{jk}$ refers to the School-specific random effect ($\zeta_{jk} \sim N(0,\sigma^2_\zeta)$) and $\eta_k$ is the Strata-specific random effect ($\eta_k \sim N(0,\sigma^2_\eta)$).
+
+The exception is school-level outcomes (marked where they occur). For these, there was obviously no need to control for school-level effects, therefore the model was somewhat simplified.
+$$\text{Outcome}_{jk} = b_0 + b_1 \text{Treatment}_{ijk} + \eta_{k} + \epsilon_{jk}$$
+Where $\eta_k$ is the Strata-specific random effect, $\eta_k \sim N(0,\sigma^2_\eta)$.
+
+
+```{r, warning=FALSE}
+#################
+## MLM Table 6 ##
+#################
+
+## Limiting to Just the interviewed sample.
+## Appears that variables used to limit different data collection points
+## ("lbacadem edad academ") I think these are just variables that were collected
+## at a specific point, therefore where they aren't NA indicates sample.
+estud_interviewed <- estud[(estud$grupo == 'S' | estud$grupo == '6') & !is.na(estud$academ),]
+
+
+## Collapsing for school-level
+school_level <- select(estud_interviewed, codmod, accesoie, ratiocom, tratada,
+                       totestud, stratum) %>%
+  group_by(codmod) %>%
+  summarize_all(funs(mean))
+
+
+## Run School-Level Regression (Just Access and Computer Ratio)
+## Access is binary, so better to run a logistic MLM
+t6_schlev <- list(glmer(accesoie ~ tratada + (1|stratum), data=school_level, family=binomial(link="logit")),
+                  lmer(ratiocom ~ tratada + (1|stratum), data=school_level))
+
+## Run MLM Regressions
+t6_outcomes <- c("compu", "compacce", "usocompu", "usocompe",
+                 "usocompc", "usocompp", "usoint", "compuse")
+t6_mlms <- sapply(t6_outcomes, function(outc) {
+    lmer(as.formula(paste(outc,"tratada + (1|stratum/codmod)", sep='~')), 
+         data=estud_interviewed)
+})
+
+## Combine all together
+t6_regs <- c(t6_schlev, t6_mlms)
+
+
+## Build table - because of the glm I have to add that one separately
+t6_mlm_tbl <- rbind(data.frame(AdjDif = coef(summary(t6_regs[[1]]))["tratada","Estimate"],
+                               SE = coef(summary(t6_regs[[1]]))["tratada","Std. Error"],
+                               p = coef(summary(t6_regs[[1]]))["tratada","Pr(>|z|)"]),
+                    data.frame(AdjDif = sapply(t6_regs[-1], function(x) coef(summary(x))["tratada","Estimate"]),
+                               SE = sapply(t6_regs[-1], function(x) coef(summary(x))["tratada","Std. Error"]),
+                               p = sapply(t6_regs[-1], function(x) coef(summary(x))["tratada","Pr(>|t|)"]))) 
+                    
+#################
+## MLM Table 8 ##
+#################
+
+t8_outcomes <- c("asisten", "tareaaye", "ecmash", "leyoayer",
+                 "leer", "behavior","motiva", "autocon","noncogni")
+
+## School Level Outcome (Enrollment)
+t8_schlev <- list(lmer(totestud ~ tratada + (1|stratum), data=school_level))
+
+## Run Student-Level outcomes
+t8_mlms <- sapply(t8_outcomes, function(outc) {
+    lmer(as.formula(paste(outc,"tratada + (1|stratum/codmod)",
+                          sep='~')), data=estud_interviewed)
+})
+
+## Combine Regressions
+t8_regs <- c(t8_schlev, t8_mlms)
+
+## Build table
+t8_mlm_tbl <- data.frame(AdjDif = sapply(t8_regs, function(x) coef(summary(x))["tratada","Estimate"]),
+                         SE = sapply(t8_regs, function(x) coef(summary(x))["tratada","Std. Error"]),
+                         p = sapply(t8_regs, function(x) coef(summary(x))["tratada","Pr(>|t|)"]))
+
+#################
+## MLM Table 9 ##
+#################
+
+t9_outcomes <- c("mate", "leng", "academic", "raven", "verbal", "codigos", "cognitiv", "acadcogn")
+
+## Run Regressions
+t9_regs <- sapply(t9_outcomes, function(outc) {
+    lmer(as.formula(paste(outc,"tratada + (1|stratum/codmod)",
+                          sep='~')), data=estud_interviewed)
+})
+
+## Build table
+t9_mlm_tbl <- data.frame(AdjDif = sapply(t9_regs, function(x) coef(summary(x))["tratada","Estimate"]),
+                         SE = sapply(t9_regs, function(x) coef(summary(x))["tratada","Std. Error"]),
+                         p = sapply(t9_regs, function(x) coef(summary(x))["tratada","Pr(>|t|)"]))
+
+##################
+## MLM Table 10 ##
+##################
+
+t10_outcomes <- c("mate", "leng", "academic", "raven", "verbal", "codigos", "cognitiv", "acadcogn")
+
+## Run Regressions
+t10_regs <- sapply(t10_outcomes, function(outc) {
+    lmer(as.formula(paste(outc,"tratada + (1|stratum/codmod)",
+                          sep='~')), data=estud_interviewed)
+})
+
+## Build table
+t10_mlm_tbl <- data.frame(AdjDif = sapply(t10_regs, function(x) coef(summary(x))["tratada","Estimate"]),
+                         SE = sapply(t10_regs, function(x) coef(summary(x))["tratada","Std. Error"]),
+                         p = sapply(t10_regs, function(x) coef(summary(x))["tratada","Pr(>|t|)"]))
+
+
+
+#####################
+## Adjust P-Values ##
+#####################
+
+mlm_p_vals <- c(t6_mlm_tbl$p, t8_mlm_tbl$p, t9_mlm_tbl$p, t10_mlm_tbl$p)
+mlm_adjusted_p <- p.adjust(mlm_p_vals, method='fdr')
+```
+
+```{r}
+t6rn <- c("School has computers (School Level)",
+          "Number of computers per student at the school",
+          "Student has a computer",
+          "Computer access summary measure",
+          "Used a computer last week",
+          "Used a computer at school last week",
+          "Used a computer at home last week",
+          "Used a computer in a private center last week",
+          "Ever used internet",
+          "Computer use summary measure")
+
+
+mutate(t6_mlm_tbl, q = mlm_adjusted_p[1:10]) %>%
+  select(AdjDif, SE, q) %>%
+  pander(col.names = c("Adj. Difference", "Standard Error", "q Value"), row.names=t6rn,
+         caption="Effects on Computer Access and Use (Interviewed Sample)")
+```
+
+With this model, the difference between the treatment and control in terms of "Ever having used a computer" is much smaller. This provides further validity to the comparison of the effects on the treatment group later.
+
+```{r}
+t8rn <- c("Enrollment (School-Level)",
+          "Attendance",
+          "Studied at home yesterday",
+          "Studied at home one or more hours daily last week",
+          "Read a book yesterday",
+          "Read a book last week",
+          "Learning behaviors summary measure",
+          "Intrinsic Motivation Index",
+          "Self-perceived school competence index",
+          "Noncognitive outcomes summary measure")
+
+
+mutate(t8_mlm_tbl, q = mlm_adjusted_p[11:20]) %>%
+  select(AdjDif, SE, q) %>%
+  pander(col.names = c("Adj. Difference", "Standard Error", "q Value"), row.names = t8rn,
+         caption="Effects on Learning Behaviors and Noncognitive Outcomes") 
+
+```
+
+A few effect were found to be negative, but not significantly so, so we can conclude its most likely the result of pure measurement error on zero effect.
+
+```{r}
+t9rn <- c("Math",
+          "Language",
+          "Academic Achievement Summary",
+          "Raven's Progressive Matrices",
+          "Verbal Fluency Test",
+          "Coding Test",
+          "Cognitive Skills Summary",
+          "Academic Achievement/Cognitive Skill Summary")
+
+mutate(t9_mlm_tbl, q = mlm_adjusted_p[21:28]) %>%
+  select(AdjDif, SE, q) %>%
+  pander(col.names = c("Adj. Difference", "Standard Error", "q Value"), row.names = t9rn,
+         caption="Effects on Academic and Cognitive Outcomes (Interviewed Sample)")
+```
+
+
+
+## Analysis of Laptop Use and Competance
+
+Table 7 in the paper refers to measure of laptop use and competence, however these were limited to the treatment group. The reason given was that the OLPC laptops use a specialized Linux operating system that differs in its interface from that of a windows computers. The researchers argue that comparing such skills between the two groups would be an invalid comparison. However data was collected for these competencies for at least some of the control groups, therefore we will examine the results when applying the same multilevel model to this data. This will include the competencies (_Panel B_), but not the indicators of laptop use, as these data were extracted from the logs of the laptops, so the control group will obviously not provide any observations.
+
+```{r}
+t7_outcomes <- c("basic", "ubicar", "escribir", "invest", "libdib", "cuentos", "habilap")
+
+## Run Regressions
+t7_regs <- sapply(t7_outcomes, function(outc) {
+    lmer(as.formula(paste(outc,"tratada + (1|stratum/codmod)",
+                          sep='~')), data=estud_interviewed)
+})
+
+## Build table
+t7_mlm_tbl <- data.frame(AdjDif = sapply(t7_regs, function(x) coef(summary(x))["tratada","Estimate"]),
+                         SE = sapply(t7_regs, function(x) coef(summary(x))["tratada","Std. Error"]),
+                         q = p.adjust(sapply(t7_regs, function(x) coef(summary(x))["tratada","Pr(>|t|)"]), method='fdr'))
+
+t7rn <- c("Basic Operation", "Journal Application", "Writing Application", 
+          "Wikipedia", "Picture Books", "Stories", "Average Competency")
+
+pander(t7_mlm_tbl, col.names = c("Adj. Difference", "Standard Error", "q Value"), 
+       row.names = t7rn,  caption= "Effect on Computer Competencies")
+```
+
+These all appear to be significantly greater competencies in the treatment group as compared with the control. However, the discussion of whether this comparison (a competency of opening Wikipedia on an OLPC laptop, compared with on a Windows computer, for example) is actually valid at all. Furthermore, the sample size of the control group with non-missing data in these categories is problematic.
+
+```{r}
+require(ggplot2)
+
+nonmiss_trt <- sapply(t7_outcomes, function(outc) 
+  c(sum(!is.na(estud_interviewed[,outc]) & estud_interviewed$tratada == 1)))
+nonmiss_ctl <- sapply(t7_outcomes, function(outc) 
+  c(sum(!is.na(estud_interviewed[,outc]) & estud_interviewed$tratada == 0)))
+
+nonmiss_dta <- data.frame(outc = rep(c("Basic Operation", "Journal Application", 
+                                       "Writing Application", "Wikipedia", 
+                                       "Picture Books", "Stories", 
+                                       "Average Competency"), 2),
+                          nmiss = c(nonmiss_trt, nonmiss_ctl),
+                          Treatment = rep(c("Treatment", "Control"), each=7))
+
+ggplot(nonmiss_dta, aes(y = nmiss, x = outc, fill = Treatment)) + 
+  geom_bar(stat="identity", position = "dodge") + 
+  xlab("Computer Competancy Outcomes") + ylab("Number of Values") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+
+In future studies it might be recommendable to attempt to measure more general computer skills, such as typing, or locating a new application that could be more comparable between the treatment and control. The fact that such things were not included in the published paper is unfortunate, as it missed an opportunity to examine the potentially positive results of receiving the laptop: computer skills which are certainly useful in modern job markets.
+
+
+```{r, eval=F, results = 'asis', message=F}
+## A more in-depth look at the models - not actually printed here.
+
+require(stargazer)
+
+t7_regs_nolmertest <- sapply(t7_outcomes, function(outc) {
+    lme4::lmer(as.formula(paste(outc,"tratada + (1|stratum/codmod)",
+                          sep='~')), data=estud_interviewed)
+})
+
+stargazer(t7_regs_nolmertest)
+```
+
+# References
+
+- Benjamini, Y., and Hochberg, Y. (1995). Controlling the false discovery rate: a practical and powerful approach to multiple testing. _Journal of the Royal Statistical Society Series B_ *57*, 289-300.
+
+<!--- _Mutoss: Unified Multiple Testing Procedures Version 0.1-8 from R-Forge.__ Accessed December 8, 2017. https://rdrr.io/rforge/mutoss/.-->
